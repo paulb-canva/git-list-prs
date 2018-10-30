@@ -18,14 +18,15 @@ async function main() {
     }
   });
 
-  const key = fs
-    .readFileSync(`${process.env.HOME}/.pr-train`, 'UTF-8')
-    .toString()
-    .trim();
-  const client = github.client(key);
-  const ghsearch = client.search();
-
   const sg = simpleGit();
+
+  const key = await sg.raw(['config', '--get', 'github.apiKey']);
+  if (!key) {
+    console.log('Github API key not found. Please run `git config github.apiKey <YOUR_GITHUB_API_KEY>`');
+    process.exit(1);
+  }
+  const client = github.client(key.trim());
+  const ghsearch = client.search();
 
   let ghNick = await sg.raw(['config', '--get', `github.user`]);
   if (!ghNick) {
@@ -94,8 +95,12 @@ async function main() {
   }
 }
 
-try {
-  main();
-} catch (e) {
-  console.log(e.message);
+async function run() {
+  try {
+    await main();
+  } catch (e) {
+    console.log(e.message);
+  }
 }
+
+run();

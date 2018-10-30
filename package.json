@@ -1,7 +1,7 @@
 {
   "name": "list-prs",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.9",
+  "description": "List your pending PRs or PRs you need to review",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
