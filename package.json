@@ -1,6 +1,6 @@
 {
   "name": "git-list-prs",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "List your pending PRs or PRs you need to review",
   "main": "index.js",
   "scripts": {
