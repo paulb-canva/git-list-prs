@@ -91,7 +91,6 @@ async function main() {
   await sg.checkout(headRef);
   if (showMyToReview) {
     await sg.merge([`origin/${headRef}`, '--ff-only']);
-    //await sg.pull('origin', headRef);
   }
 }
 
