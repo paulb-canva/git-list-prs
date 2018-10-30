@@ -1,6 +1,6 @@
 {
   "name": "list-prs",
-  "version": "0.9",
+  "version": "0.9.0",
   "description": "List your pending PRs or PRs you need to review",
   "main": "index.js",
   "scripts": {
