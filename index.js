@@ -51,6 +51,11 @@ async function main() {
         order: 'desc',
       });
 
+  if (!results[0].items.length) {
+    console.log('No open PRs found, exiting.');
+    process.exit(0);
+  }
+
   const mapPr = item => ({
     title: item.title,
     number: item.number,
