@@ -19,6 +19,7 @@
     "commander": "^2.19.0",
     "inquirer": "^6.2.0",
     "octonode": "^0.9.5",
+    "open": "0.0.5",
     "simple-git": "^1.106.0"
   },
   "prettier": {

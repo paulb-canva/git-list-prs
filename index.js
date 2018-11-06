@@ -7,6 +7,7 @@ const simpleGit = require('simple-git/promise');
 const colors = require('colors');
 const program = require('commander');
 const package = require('./package.json');
+const open = require('open');
 
 async function main() {
   program.version(package.version).option('-r, --to-review', 'Show what I have to review');
@@ -27,13 +28,13 @@ async function main() {
   }
   const client = github.client(key.trim());
   const ghsearch = client.search();
-
+  
   let ghNick = await sg.raw(['config', '--get', `github.user`]);
   if (!ghNick) {
     ghNick = (await client.me().infoAsync())[0].login;
     await sg.addConfig('github.user', ghNick);
   }
-
+  ghNick = ghNick.trim();
   const remoteUrl = await sg.raw(['config', '--get', `remote.origin.url`]);
   const nickAndRepo = remoteUrl.match(/:(.*)\.git/)[1];
 
@@ -46,11 +47,11 @@ async function main() {
         order: 'desc',
       })
     : await ghsearch.issuesAsync({
-        q: `state:open+repo:${nickAndRepo}+type:pr+author:${ghNick}`,
+        q: `state:open+type:pr+author:${ghNick}`,
         sort: 'updated',
         order: 'desc',
       });
-
+  
   if (!results[0].items.length) {
     console.log('No open PRs found, exiting.');
     process.exit(0);
@@ -61,19 +62,26 @@ async function main() {
     number: item.number,
     head: item.head,
     author: item.user.login,
+    url: item.pull_request.html_url
   });
   const pullRequests = results[0].items.map(item => mapPr(item));
-
+  
   const getChoiceTitle = (pr, index) =>
     showMyToReview
       ? `[${index + 1}] ${pr.title} ${colors.italic('[from ' + pr.author + ']')}`
       : `[${index + 1}] ${pr.title}`;
 
+  const getChoiceUrl = (pr, index) => pr.url
+
   const getChoices = prs => {
-    return prs.map((pr, index) => ({
+    return [].concat.apply([], prs.map((pr, index) => ([{
       name: getChoiceTitle(pr, index),
       value: pr,
-    }));
+    }, 
+    {
+      name: '  -> view ' + getChoiceUrl(pr, index),
+      value: getChoiceUrl(pr, index)
+    }])));
   };
 
   const answer = await inquirer.prompt([
@@ -86,6 +94,12 @@ async function main() {
     },
   ]);
 
+  if (typeof answer.pr === 'string' && answer.pr.startsWith('http')) {
+    console.log('Viewing pull request in browser');
+    open(answer.pr);
+    return;
+  }
+ 
   const ghpr = client.pr(nickAndRepo, answer.pr.number);
   const prInfo = await ghpr.infoAsync();
   const headRef = prInfo[0].head.ref;
